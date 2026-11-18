@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>감독 레이더 · 시험·자율학습 전자기기 감지 보조</title>
+<style>
+:root{
+  --bg:#0b0f14; --panel:#121821; --panel2:#18212c; --line:#243142; --text:#e6edf5; --muted:#8b9aad;
+  --accent:#4fd1c5; --alert:#ff5d5d; --warn:#ffb547; --info:#7aa2ff; --ok:#3ddc97; --ex:#5b6676;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+body.dim{filter:brightness(.55)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1040px;margin:0 auto;padding:12px 12px 80px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px 10px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:34px;height:34px;border-radius:50%;border:2px solid var(--accent);position:relative;flex:none}
+.logo:after{content:"";position:absolute;inset:7px;border-radius:50%;border:2px solid var(--accent);opacity:.6}
+.logo:before{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:var(--accent)}
+h1{font-size:18px;margin:0;letter-spacing:-.3px}
+.brand p{margin:0;color:var(--muted);font-size:12px}
+.pill{padding:5px 12px;border-radius:99px;font-size:13px;font-weight:700;background:var(--panel2);border:1px solid var(--line);white-space:nowrap}
+.pill.watching{background:rgba(61,220,151,.15);border-color:var(--ok);color:var(--ok)}
+.pill.waiting,.pill.prep{background:rgba(122,162,255,.12);border-color:var(--info);color:var(--info)}
+.pill.paused{background:rgba(255,181,71,.12);border-color:var(--warn);color:var(--warn)}
+.pill.ended{color:var(--muted)}
+nav.tabs{display:flex;gap:6px;margin-bottom:12px;position:sticky;top:0;z-index:20;background:var(--bg);padding:6px 0}
+nav.tabs button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-weight:600;color:var(--muted)}
+nav.tabs button.on{background:var(--panel2);color:var(--text);border-color:var(--accent)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0}
+.card h3{font-size:14px;margin:16px 0 6px;color:var(--accent)}
+.cardHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+input[type=text],input[type=time],input[type=number],select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:6px}
+.seg button{flex:1;padding:8px 4px;background:var(--panel2);border:0;font-size:13px;color:var(--muted)}
+.seg button.on{background:var(--accent);color:#04201d;font-weight:700}
+small,.muted{color:var(--muted);font-size:12px}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);font-weight:700;flex:1;min-width:120px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#04201d}
+.btn.danger{background:transparent;border-color:var(--alert);color:var(--alert)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sm{padding:8px 10px;min-width:0;flex:none;font-size:13px}
+.banner{padding:12px 14px;border-radius:12px;margin-bottom:12px;border:1px solid var(--warn);background:rgba(255,181,71,.08);font-size:14px}
+.banner.demo{border-color:var(--info);background:rgba(122,162,255,.08);color:var(--info);font-weight:600;text-align:center}
+.banner .controls{margin-top:10px}
+.alertbar{position:sticky;top:58px;z-index:19;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;margin-bottom:12px;background:var(--alert);color:#fff;font-weight:700;animation:flash 1s infinite alternate}
+.alertbar button{background:#fff;color:var(--alert);border:0;border-radius:8px;padding:8px 12px;font-weight:800;flex:none}
+.alertbar div{flex:1}
+@keyframes flash{from{box-shadow:0 0 0 0 rgba(255,93,93,.6)}to{box-shadow:0 0 0 8px rgba(255,93,93,0)}}
+.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}
+.stat b{display:block;font-size:22px;line-height:1.2;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.alert b{color:var(--alert)} .stat.warn b{color:var(--warn)}
+.stat.wide{grid-column:span 4;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.stat.wide b{font-size:18px}
+.grid{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:860px){.grid{grid-template-columns:380px 1fr;gap:12px}.grid>.card{margin-bottom:12px}}
+.grid>*{min-width:0}
+.radarCard canvas{width:100%;max-width:100%;aspect-ratio:1;display:block}
+.note{display:block;margin-top:6px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:5px 10px;border-radius:99px;border:1px solid var(--line);background:var(--panel2);font-size:12px;color:var(--muted)}
+.chip.on{border-color:var(--accent);color:var(--text)}
+.dev{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--info);margin-bottom:8px;cursor:pointer}
+.dev.lv-alert{border-left-color:var(--alert);background:rgba(255,93,93,.08)}
+.dev.lv-warn{border-left-color:var(--warn)}
+.dev.lv-info{border-left-color:var(--info)}
+.dev.lv-out,.dev.lv-gone{opacity:.5;border-left-color:var(--line)}
+.dev.lv-ex{opacity:.45;border-left-color:var(--ex)}
+.dev .ic{font-size:22px;width:30px;text-align:center;flex:none}
+.dev .mid{flex:1;min-width:0}
+.dev .t1{font-size:14px;display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center}
+.dev .t2{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dev .right{text-align:right;flex:none;width:76px}
+.dist{font-weight:800;font-variant-numeric:tabular-nums}
+.bar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin:4px 0 2px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.rssi{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.badge{font-size:11px;padding:1px 7px;border-radius:99px;background:var(--line);color:var(--text);font-weight:600}
+.badge.use{background:var(--alert);color:#fff}
+.badge.new{background:var(--warn);color:#2a1a00}
+.badge.ex{background:var(--ex)}
+.badge.idle{background:#2b3747;color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:24px 8px;font-size:14px}
+.log{max-height:360px;overflow:auto}
+.ev{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}
+.ev time{color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.ev i{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;background:var(--muted)}
+.ev.alert i{background:var(--alert)} .ev.warn i{background:var(--warn)} .ev.info i{background:var(--info)}
+.ev.alert span{color:#ffb3b3;font-weight:600}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheetInner{background:var(--panel);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:560px;max-height:88vh;overflow:auto;padding:18px 16px 24px}
+@media(min-width:700px){.sheet{align-items:center}.sheetInner{border-radius:18px}}
+.sheetInner h3{margin:0 0 4px;font-size:17px}
+dl.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:12px 0;font-size:13px}
+dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;word-break:break-all}
+.blist{max-height:46vh;overflow:auto;margin:10px 0}
+.bitem{display:flex;gap:10px;align-items:center;padding:9px;border-bottom:1px solid var(--line);font-size:13px}
+.bitem input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.bitem .mid{flex:1;min-width:0}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#e6edf5;color:#0b0f14;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+.diag{list-style:none;padding:0;margin:8px 0}
+.diag li{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.diag li b{flex:none;width:22px;text-align:center}
+.ok{color:var(--ok)} .bad{color:var(--alert)} .mid-t{color:var(--warn)}
+.sig{display:grid;grid-template-columns:1fr;gap:8px}
+@media(min-width:700px){.sig{grid-template-columns:repeat(3,1fr)}}
+.sigbox{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel2);font-size:13px}
+.sigbox h4{margin:0 0 6px;font-size:14px}
+ol.steps{padding-left:20px;margin:6px 0} ol.steps li{margin-bottom:8px;font-size:14px}
+code{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12px;word-break:break-all}
+.setgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.tog input{width:22px;height:22px;accent-color:var(--accent)}
+table.rep{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+table.rep th,table.rep td{border:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+table.rep th{background:var(--panel2);font-weight:700}
+.sess{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--panel2);cursor:pointer}
+.sess.on{border-color:var(--accent)}
+.sess .mid{flex:1;min-width:0}
+#printArea{display:none}
+@media print{
+  body{background:#fff;color:#000;filter:none!important}
+  .wrap,#toast,.sheet{display:none!important}
+  #printArea{display:block;color:#000;font-size:11pt}
+  #printArea table.rep th,#printArea table.rep td{border:1px solid #999;color:#000}
+  #printArea table.rep th{background:#eee}
+  #printArea h2{font-size:16pt;margin:0 0 6px}
+  #printArea .muted{color:#444}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo"></div>
+      <div><h1>감독 레이더</h1><p>시험·자율학습 감독 보조 · 블루투스 기반 전자기기 감지</p></div>
+    </div>
+    <div id="phasePill" class="pill">꺼짐</div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="watch" class="on">감독</button>
+    <button data-tab="records">기록</button>
+    <button data-tab="guide">설정·안내</button>
+  </nav>
+
+  <!-- 감독 탭 -->
+  <section id="tab-watch">
+    <div id="resumeBanner" class="banner hidden"></div>
+    <div id="demoBanner" class="banner demo hidden">데모 모드 · 가상 기기 데이터로 동작 중입니다</div>
+    <div id="alertBar" class="alertbar hidden"><div id="alertText"></div><button id="alertAck">확인</button></div>
+
+    <div class="card" id="setupCard">
+      <div class="row">
+        <label for="title">감독 이름</label>
+        <input type="text" id="title" placeholder="예: 2학년 3반 기말고사 1교시" maxlength="60">
+      </div>
+      <div class="row two">
+        <div>
+          <label>감시 시작</label>
+          <div class="seg" id="startMode">
+            <button data-v="now">누르면 바로</button>
+            <button data-v="time">시각 지정</button>
+          </div>
+          <input type="time" id="startTime">
+        </div>
+        <div>
+          <label for="endTime">자동 종료 (선택)</label>
+          <input type="time" id="endTime">
+          <small>비워두면 직접 종료</small>
+        </div>
+      </div>
+      <div class="row">
+        <label for="radius">감지 반경 <b id="radiusVal" style="color:var(--text)"></b></label>
+        <input type="range" id="radius" min="1" max="20" step="0.5">
+        <small id="radiusHint"></small>
+      </div>
+      <div class="controls" id="controls"></div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="grid">
+      <div class="card radarCard">
+        <canvas id="radar"></canvas>
+        <small class="note">중심 = 이 기기 · 점선 원 = 감지 반경. 점의 <b>방향은 실제 위치가 아니고</b>, 중심까지의 거리만 신호 세기로 추정한 값입니다.</small>
+      </div>
+      <div class="card">
+        <div class="cardHead">
+          <h2>감지 기기</h2>
+          <div class="chips" id="filters">
+            <button class="chip" data-f="range">범위 내</button>
+            <button class="chip" data-f="watch">감시 대상</button>
+            <button class="chip" data-f="all">전체</button>
+            <button class="chip" data-f="ex">제외됨</button>
+          </div>
+        </div>
+        <div id="devList"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardHead"><h2>감독 로그</h2><small id="logCount"></small></div>
+      <div id="eventLog" class="log"></div>
+    </div>
+  </section>
+
+  <!-- 기록 탭 -->
+  <section id="tab-records" hidden>
+    <div class="card">
+      <div class="cardHead"><h2>감독 기록</h2><small>이 기기의 브라우저에만 저장됩니다 (최근 20건)</small></div>
+      <div id="sessList"></div>
+    </div>
+    <div class="card" id="reportCard">
+      <div class="cardHead">
+        <h2>기록 보기</h2>
+        <div class="controls">
+          <button class="btn sm" id="csvEvents">로그 CSV</button>
+          <button class="btn sm" id="csvDevices">기기 CSV</button>
+          <button class="btn sm" id="printRep">인쇄·PDF</button>
+          <button class="btn sm danger" id="delRep">삭제</button>
+        </div>
+      </div>
+      <div id="reportView"></div>
+    </div>
+  </section>
+
+  <!-- 설정·안내 탭 -->
+  <section id="tab-guide" hidden>
+    <div class="card">
+      <div class="cardHead"><h2>환경 진단</h2><button class="btn sm" id="diagBtn">다시 검사</button></div>
+      <ul class="diag" id="diagList"></ul>
+    </div>
+
+    <div class="card">
+      <h2>감지할 수 있는 신호</h2>
+      <div class="sig" style="margin-top:10px">
+        <div class="sigbox"><h4><span class="ok">●</span> 블루투스(BLE)</h4>휴대폰·이어폰·스마트워치가 내보내는 광고 신호를 받아 기기 종류와 대략적인 거리를 추정합니다. 아이폰은 <b>화면 켜짐·앱 사용 상태</b>까지 추정할 수 있습니다.</div>
+        <div class="sigbox"><h4><span class="bad">●</span> 와이파이</h4>브라우저(웹앱)는 주변 와이파이 신호를 읽을 수 없습니다. 휴대폰 전용 앱으로 만들어도 공유기 목록만 보이고, 주변 휴대폰은 보이지 않습니다.</div>
+        <div class="sigbox"><h4><span class="bad">●</span> 이동통신(LTE·5G)</h4>앱으로는 감지할 수 없습니다. 통화·데이터 사용을 잡으려면 별도의 <b>RF 전파 탐지기</b>(전파 세기만 측정)를 함께 쓰는 것을 권장합니다.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>처음 설정하기 (안드로이드 + 크롬 권장)</h2>
+      <ol class="steps">
+        <li>이 HTML 파일을 <b>https 주소</b>로 엽니다. GitHub Pages나 Netlify Drop에 파일을 올리면 됩니다. <span class="muted">구글 Apps Script 웹앱은 iframe 안에서 실행되어 블루투스가 차단되므로 사용할 수 없습니다. PC 크롬에서는 파일을 바로 열어도 됩니다.</span></li>
+        <li>크롬 주소창에 <code>chrome://flags/#enable-experimental-web-platform-features</code>를 입력하고 <b>Enabled</b>로 바꾼 뒤 크롬을 다시 실행합니다. (블루투스 스캔 기능이 아직 실험 기능이라 필요합니다)</li>
+        <li>휴대폰의 <b>블루투스와 위치</b>를 켭니다. 처음 스캔할 때 나오는 권한 요청은 허용합니다.</li>
+        <li>감독 중에는 <b>화면을 켠 채로 이 탭을 띄워 두세요.</b> 화면 꺼짐은 자동으로 막아 주지만, 다른 앱으로 전환하면 스캔이 멈춥니다.</li>
+      </ol>
+      <p class="muted">설정이 어렵다면 아래 [데모 모드]를 켜고 가상 데이터로 사용법을 먼저 익혀 보세요.</p>
+    </div>
+
+    <div class="card">
+      <h2>권장 사용 순서</h2>
+      <ol class="steps">
+        <li><b>휴대폰을 수거한 뒤</b>, 수거함 바로 옆에서 <b>[기준선 등록]</b>을 누릅니다. 가까이 있는 기기(수거함 휴대폰, 감독 교사 휴대폰)가 자동으로 체크되며, 확인하면 감시에서 제외됩니다.</li>
+        <li>감독용 기기를 교탁이나 교실 중앙에 두고, 교실 크기에 맞게 <b>감지 반경</b>을 정합니다.</li>
+        <li><b>[감시 시작]</b>을 누릅니다. 시각을 지정했다면 그 시각부터 기록됩니다.</li>
+        <li>경고가 뜨면 기기를 누르고 <b>위치·좌석 메모</b>를 남긴 뒤 해당 구역을 순회하며 확인합니다.</li>
+        <li>종료 후 <b>[기록]</b> 탭에서 인쇄·PDF·CSV로 보관합니다.</li>
+      </ol>
+      <h3>경고 종류</h3>
+      <ul class="steps" style="padding-left:20px">
+        <li><span class="badge use">사용 신호</span> 아이폰 화면 켜짐·동영상·통화, Handoff(앱 사용), AirDrop 등 <b>실제 조작</b>으로 추정되는 신호</li>
+        <li><span class="badge new">신규</span> 감시 시작 <b>이후에 새로 나타난</b> 휴대폰·이어폰·워치 (블루투스를 켰거나 기기가 반입된 경우)</li>
+        <li>노란색: 반경 안에 있는 감시 대상 기기(휴대폰·태블릿·이어폰·스마트워치 추정)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>한계와 유의사항</h2>
+      <ul class="steps" style="padding-left:20px">
+        <li><b>비행기 모드</b>이거나 <b>블루투스를 끈</b> 휴대폰은 감지되지 않습니다.</li>
+        <li>안드로이드 휴대폰은 화면이 켜졌는지 알 수 없고, 기종에 따라 신호를 거의 내보내지 않기도 합니다.</li>
+        <li>거리는 신호 세기로 추정한 값이라 오차가 큽니다(몸·책상·가방·벽에 따라 수 m 차이). 방향은 알 수 없습니다.</li>
+        <li>휴대폰은 개인정보 보호를 위해 블루투스 주소를 주기적으로 바꿉니다. 같은 기기가 새 기기로 보일 수 있어 <b>주소 변경 자동 병합</b> 기능으로 줄이지만, 완벽하지는 않습니다.</li>
+        <li>이 기록은 <b>감독 보조용 참고 자료</b>입니다. 부정행위 판단은 반드시 직접 확인한 사실로 하세요.</li>
+        <li>사용 전에 학생들에게 전자기기 감지 장비를 쓴다고 미리 안내하는 것을 권장합니다.</li>
+        <li>이 앱은 실제 기기 주소(MAC)나 통신 내용을 수집하지 않습니다. 브라우저가 만든 임의 식별값과 신호 세기만 쓰며, 기록은 이 기기에만 저장됩니다.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>세부 설정</h2>
+      <div class="setgrid" style="margin-top:10px">
+        <div><label for="txIn">1m 거리 기준 신호 (dBm)</label><input type="number" id="txIn" step="1" min="-90" max="-30"></div>
+        <div><label for="nIn">공간 환경</label>
+          <select id="nIn">
+            <option value="2">트인 공간 (2.0)</option>
+            <option value="2.5">일반 교실 (2.5)</option>
+            <option value="3">책상·사람 많음 (3.0)</option>
+            <option value="3.5">벽·칸막이 많음 (3.5)</option>
+          </select></div>
+        <div><label for="staleIn">신호 끊김 판정 (초)</label><input type="number" id="staleIn" min="5" max="120" step="1"></div>
+        <div style="display:flex;align-items:flex-end"><small>기기 상세 화면의 [이 기기로 1m 보정]을 쓰면 기준 신호를 자동으로 맞춥니다.</small></div>
+      </div>
+      <div class="tog"><span>진동 알림</span><input type="checkbox" id="vibIn"></div>
+      <div class="tog"><span>소리 알림 <small>(시험 중에는 끄는 것을 권장)</small></span><input type="checkbox" id="sndIn"></div>
+      <div class="tog"><span>주소 변경 자동 병합</span><input type="checkbox" id="mergeIn"></div>
+      <div class="tog"><span>화면 어둡게</span><input type="checkbox" id="dimIn"></div>
+      <div class="tog"><span><b>데모 모드</b> <small>(가상 기기로 체험)</small></span><input type="checkbox" id="demoIn"></div>
+      <div class="controls" style="margin-top:12px"><button class="btn danger" id="wipeAll">모든 기록·설정 삭제</button></div>
+    </div>
+  </section>
+</div>
+
+<div id="sheet" class="sheet hidden"><div class="sheetInner" id="sheetInner"></div></div>
+<div id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+'use strict';
+/* ========== 공통 유틸 ========== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const fmtT=t=>{if(!t)return '-';const d=new Date(t);return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`};
+const fmtHM=t=>{if(!t)return '-';const d=new Date(t);return `${pad(d.getHours())}:${pad(d.getMinutes())}`};
+const fmtD=t=>{const d=new Date(t);return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}`};
+const fmtDur=ms=>{ms=Math.max(0,Math.round(ms/1000));const h=Math.floor(ms/3600),m=Math.floor(ms%3600/60),s=ms%60;return h?`${h}:${pad(m)}:${pad(s)}`:`${pad(m)}:${pad(s)}`};
+const LS={
+  get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}},
+  del(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+function toast(msg,ms=2600){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),ms)}
+function todayAt(hm){const [h,m]=hm.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d.getTime()}
+
+/* ========== 설정 ========== */
+const DEF={title:'',startMode:'now',startTime:'',endTime:'',radius:6,tx:-59,n:2.5,staleSec:30,sound:false,vibrate:true,merge:true,dim:false,demo:false};
+const S=Object.assign({},DEF,LS.get('radar.settings',{}));
+const saveSettings=()=>LS.set('radar.settings',S);
+const rssiAt=d=>S.tx-10*S.n*Math.log10(Math.max(0.3,d));
+const thr=()=>rssiAt(S.radius);
+const distOf=r=>Math.pow(10,(S.tx-r)/(10*S.n));
+const fmtDist=d=>d<1?'1m 이내':d>30?'30m+':`${d<10?d.toFixed(1):Math.round(d)}m`;
+const USE_HOLD=20000;
+
+/* ========== 기기 분류 ========== */
+const CAT={
+  phone:{ko:'휴대폰',ic:'📱',watch:true,pri:6},
+  apple:{ko:'애플 기기(아이폰 추정)',ic:'📱',watch:true,pri:5},
+  tablet:{ko:'태블릿',ic:'📲',watch:true,pri:5},
+  android:{ko:'안드로이드 기기 추정',ic:'📱',watch:true,pri:4},
+  samsung:{ko:'삼성 기기(폰·버즈·워치)',ic:'📱',watch:true,pri:3},
+  earbuds:{ko:'무선 이어폰',ic:'🎧',watch:true,pri:4},
+  wearable:{ko:'스마트워치·밴드',ic:'⌚',watch:true,pri:4},
+  pc:{ko:'노트북·PC',ic:'💻',watch:false,pri:2},
+  tag:{ko:'위치 태그·Find My',ic:'🏷️',watch:false,pri:2},
+  beacon:{ko:'비콘',ic:'📡',watch:false,pri:1},
+  input:{ko:'키보드·마우스',ic:'⌨️',watch:false,pri:1},
+  other:{ko:'기타 기기',ic:'🔹',watch:false,pri:1},
+  unknown:{ko:'미확인 블루투스 기기',ic:'•',watch:false,pri:0}
+};
+const COMP={0x004C:'Apple',0x0075:'Samsung',0x00E0:'Google',0x0006:'Microsoft',0x00C4:'LG',0x038F:'Xiaomi',0x027D:'Huawei',0x0157:'Huami',0x0087:'Garmin',0x012D:'Sony',0x0171:'Amazon',0x0059:'Nordic',0x02E5:'Espressif',0x0499:'Ruuvi',0x0131:'Cypress',0x000F:'Broadcom'};
+const COMP_CAT={0x0075:'samsung',0x00E0:'android',0x0006:'pc',0x038F:'android',0x027D:'android',0x0157:'wearable',0x0087:'wearable',0x0171:'other',0x00C4:'other'};
+const APPLE_T={0x02:'iBeacon',0x05:'AirDrop',0x06:'HomeKit',0x07:'근접 페어링(AirPods 등)',0x08:'Siri',0x09:'AirPlay',0x0A:'AirPlay 송신',0x0B:'Watch 연동',0x0C:'Handoff',0x0D:'핫스팟 수신',0x0E:'핫스팟 제공',0x0F:'Nearby Action',0x10:'Nearby Info',0x12:'Find My'};
+const ACTION={0:'상태 정보 없음',1:'상태 보고 꺼짐',3:'유휴(화면 꺼짐 추정)',5:'잠금 상태 오디오 재생',7:'화면 켜짐(사용 중)',9:'화면 켜짐·동영상 재생',10:'워치 착용·잠금 해제',11:'최근 사용자 조작',13:'운전 중',14:'통화·FaceTime 중'};
+const USE_CODES=new Set([7,9,11,14]);
+const SVC={0xFE2C:['earbuds','Fast Pair 액세서리'],0xFEF3:['android','Google 서비스'],0xFE9F:['android','Google 서비스'],0xFD5A:['tag','SmartTag'],0x1812:['input','HID 입력장치'],0x180D:['wearable','심박 센서'],0xFD6F:['android','노출 알림']};
+const NAME_RULES=[
+  [/ipad|galaxy\s*tab|\btab\s?s\d|tablet/i,'tablet'],
+  [/airpods|beats|buds|earbud|soundcore|qcy|jbl|\bwf-|\bwh-|headphone|earphone|이어폰|헤드폰/i,'earbuds'],
+  [/watch|\bband\b|mi\s?band|amazfit|fitbit|\bfit\d?\b|워치/i,'wearable'],
+  [/iphone/i,'phone'],
+  [/galaxy\s*(s|z|a|m|note|quantum|flip|fold)|\bsm-[sfangm]\d|pixel|redmi|xiaomi|poco|oneplus|oppo|vivo|huawei|honor|moto\s?[gez]/i,'phone'],
+  [/macbook|imac|mac\s?mini|laptop|desktop|notebook|\bpc\b|windows/i,'pc'],
+  [/smarttag|airtag|\btile\b/i,'tag'],
+  [/keyboard|mouse|키보드|마우스|pencil/i,'input'],
+  [/\btv\b|soundbar|speaker|스피커/i,'other']
+];
+function setCat(r,c){if(CAT[c].pri>=CAT[r.cat].pri)r.cat=c}
+function shortUuid(u){const m=/^0000([0-9a-f]{4})-0000-1000-8000-00805f9b34fb$/i.exec(String(u));return m?parseInt(m[1],16):null}
+
+function analyze(ev,name){
+  const r={company:null,cat:'unknown',types:[],use:false,useText:'',actText:'',nameMatched:false};
+  const md=ev.manufacturerData;
+  if(md&&typeof md.forEach==='function'){
+    md.forEach((dv,cid)=>{
+      if(r.company==null)r.company=cid;
+      if(cid===0x004C)parseApple(dv,r);
+      else if(COMP_CAT[cid])setCat(r,COMP_CAT[cid]);
+    });
+  }
+  const svcs=[];
+  (ev.uuids||[]).forEach(u=>svcs.push(shortUuid(u)));
+  if(ev.serviceData&&typeof ev.serviceData.forEach==='function')ev.serviceData.forEach((v,k)=>svcs.push(shortUuid(k)));
+  svcs.forEach(s=>{if(s!=null&&SVC[s]){setCat(r,SVC[s][0]);if(!r.types.includes(SVC[s][1]))r.types.push(SVC[s][1])}});
+  if(name){for(const [re,c] of NAME_RULES){if(re.test(name)){r.cat=c;r.nameMatched=true;break}}}
+  return r;
+}
+function parseApple(dv,r){
+  setCat(r,'apple');
+  let i=0;const L=dv.byteLength;
+  while(i+1<L){
+    const t=dv.getUint8(i),len=dv.getUint8(i+1),p=i+2;
+    if(APPLE_T[t]&&!r.types.includes(APPLE_T[t]))r.types.push(APPLE_T[t]);
+    if(t===0x10&&p<L){
+      const code=dv.getUint8(p)&0x0F;
+      r.actText=ACTION[code]||`상태 코드 ${code}`;
+      if(USE_CODES.has(code)){r.use=true;r.useText=ACTION[code]}
+    }else if(t===0x0C){r.use=true;r.useText=r.useText||'Handoff(앱 사용 중)'}
+    else if(t===0x05){r.use=true;r.useText=r.useText||'AirDrop 시도'}
+    else if(t===0x0F){r.use=true;r.useText=r.useText||'공유·설정 동작'}
+    else if(t===0x07)setCat(r,'earbuds');
+    else if(t===0x0E)setCat(r,'phone');
+    else if(t===0x0B)setCat(r,'wearable');
+    else if(t===0x12){if(r.cat==='apple'&&r.types.length===1)r.cat='tag'}
+    else if(t===0x02){if(r.types.length===1)r.cat='beacon'}
+    else if(t===0x09){if(r.types.length===1)r.cat='other'}
+    if(len===0)break;
+    i=p+len;
+  }
+  // AirPods(근접 페어링)는 애플 기기보다 우선
+  if(r.types.includes(APPLE_T[0x07]))r.cat='earbuds';
+}
+
+/* ========== 세션 / 상태 ========== */
+let session=null, scanning=false, scanMode=null, scanObj=null, demoTimer=null;
+let lastTick=Date.now(), lastSave=0, filter='range', alertQ=[], viewId=null, scanStartedAt=0;
+
+function newSession(){
+  session={id:'S'+Date.now(),title:S.title||'감독 기록',createdAt:Date.now(),startAt:null,endAt:null,stoppedAt:null,watchStarted:false,
+    demo:scanMode==='demo',settings:{radius:S.radius,tx:S.tx,n:S.n},devices:{},idMap:{},events:[],seq:0};
+}
+function phase(now=Date.now()){
+  if(!session)return 'off';
+  if(session.stoppedAt)return 'ended';
+  if(!scanning)return 'paused';
+  if(!session.startAt)return 'prep';
+  return now<session.startAt?'waiting':'watching';
+}
+const PHASE_KO={off:'꺼짐',prep:'준비 중',waiting:'시작 대기',watching:'감시 중',paused:'일시 중단',ended:'종료됨'};
+function logEvent(type,level,msg,rid){
+  if(!session)return;
+  session.events.push({t:Date.now(),type,level,msg,rid:rid||null});
+  if(session.events.length>3000)session.events.splice(0,session.events.length-3000);
+}
+/* 스캔 직후 15초는 '이미 있던 기기'를 파악하는 준비 시간으로, 신규 등장으로 보지 않음 */
+const WARM=15000;
+const isNewAt=(t,now)=>!!(session&&session.startAt&&phase(now)==='watching'&&t>=session.startAt&&t>=(session.warmUntil||0));
+const isWatchCat=d=>CAT[d.cat]&&CAT[d.cat].watch;
+const devName=d=>`기기 ${pad(d.no)}${d.memo?` (${d.memo})`:''}`;
+
+function createDevice(id,name,info,rssi,now,firstSeen){
+  const no=++session.seq;
+  const d={rid:'d'+no,no,ids:[id],lastId:id,name:name||'',company:info.company,cat:info.cat,catLocked:info.nameMatched,types:info.types.slice(),
+    firstSeen:firstSeen||now,lastSeen:now,count:0,ema:rssi,last:rssi,max:rssi,inRange:false,inRangeMs:0,excluded:false,memo:'',
+    lastUseAt:0,useText:'',useCount:0,useAnnounced:false,actText:'',actAt:0,
+    newAfterStart:isNewAt(firstSeen||now,now),newAnnounced:false,newAt:0,rotations:0,mergeInfo:null};
+  session.devices[d.rid]=d;session.idMap[id]=d.rid;
+  return d;
+}
+function findRotation(info,rssi,now){
+  if(info.company==null)return null;
+  let best=null,bd=1e9;
+  for(const d of Object.values(session.devices)){
+    if(d.company!==info.company)continue;
+    if(d.cat!==info.cat&&!(CAT[d.cat].watch&&CAT[info.cat].watch&&d.cat!=='earbuds'&&info.cat!=='earbuds'))continue;
+    const gap=now-d.lastSeen;if(gap<1500||gap>120000)continue;
+    if(d.mergeInfo&&now-d.mergeInfo.at<120000)continue;
+    const diff=Math.abs(d.ema-rssi);if(diff>12)continue;
+    if(diff<bd){bd=diff;best=d}
+  }
+  return best;
+}
+
+/* ========== 광고 신호 수신 ========== */
+function onAdv(ev){
+  if(!session||session.stoppedAt)return;
+  const now=Date.now();
+  const id=ev.device&&ev.device.id;if(!id)return;
+  const rssi=typeof ev.rssi==='number'?ev.rssi:null;if(rssi==null||rssi>=0)return;
+  const name=ev.name||(ev.device&&ev.device.name)||'';
+  const info=analyze(ev,name);
+  let d=session.devices[session.idMap[id]];
+  if(!d){
+    const cand=S.merge?findRotation(info,rssi,now):null;
+    if(cand){
+      d=cand;session.idMap[id]=d.rid;d.ids.push(id);d.rotations++;
+      d.mergeInfo={at:now,newId:id,oldId:d.lastId,info,rssi,name,seen:{}};
+    }else d=createDevice(id,name,info,rssi,now);
+  }
+  // 병합 후 이전 주소가 다시 나타나면 별개 기기로 분리
+  if(d.mergeInfo){
+    const mi=d.mergeInfo;
+    if(now-mi.at>120000)d.mergeInfo=null;
+    else{
+      mi.seen[id]=now;
+      if(mi.seen[mi.newId]>mi.at+500&&mi.seen[mi.oldId]>mi.at+500){
+        d.ids=d.ids.filter(x=>x!==mi.newId);d.rotations--;d.mergeInfo=null;
+        const nd=createDevice(mi.newId,mi.name,mi.info,mi.rssi,now,mi.at);
+        nd.newAfterStart=isNewAt(mi.at,now);
+        if(id===mi.newId)d=nd;
+      }
+    }
+  }
+  d.lastId=id;d.lastSeen=now;d.count++;d.last=rssi;
+  d.ema=d.count<=1?rssi:d.ema*0.7+rssi*0.3;
+  if(rssi>d.max)d.max=rssi;
+  if(name&&!d.name)d.name=name;
+  if(d.company==null&&info.company!=null)d.company=info.company;
+  if(info.nameMatched){d.cat=info.cat;d.catLocked=true}
+  else if(!d.catLocked&&CAT[info.cat].pri>CAT[d.cat].pri)d.cat=info.cat;
+  info.types.forEach(t=>{if(!d.types.includes(t))d.types.push(t)});
+  if(info.actText){d.actText=info.actText;d.actAt=now}
+  if(info.use){d.lastUseAt=now;d.useText=info.useText}
+}
+
+/* ========== 주기 처리 ========== */
+function onWatchStart(){
+  session.watchStarted=true;
+  session.settings={radius:S.radius,tx:S.tx,n:S.n};
+  logEvent('system','sys',`감시 시작 · 반경 약 ${S.radius}m`);
+  Object.values(session.devices).forEach(d=>{
+    d.useAnnounced=false;
+    if(d.inRange&&!d.excluded&&isWatchCat(d))logEvent('enter','warn',`${devName(d)} ${CAT[d.cat].ko} — 시작 시점에 범위 안에 있음 (약 ${fmtDist(distOf(d.ema))})`,d.rid);
+  });
+}
+function onEnter(d,now){
+  if(!isWatchCat(d))return;
+  if(d.newAfterStart&&!d.newAnnounced){
+    d.newAnnounced=true;d.newAt=now;
+    const m=`감시 시작 후 새 ${CAT[d.cat].ko} 등장 — ${devName(d)} (약 ${fmtDist(distOf(d.ema))})`;
+    logEvent('new','alert',m,d.rid);alarm(m);
+  }else logEvent('enter','warn',`${devName(d)} ${CAT[d.cat].ko} 범위 진입 (약 ${fmtDist(distOf(d.ema))})`,d.rid);
+}
+function tick(){
+  const now=Date.now(),dt=Math.min(now-lastTick,5000);lastTick=now;
+  if(session&&!session.stoppedAt){
+    const ph=phase(now);
+    if(ph==='watching'&&!session.watchStarted)onWatchStart();
+    if(session.endAt&&now>=session.endAt&&session.startAt){stopSession('자동 종료 시각 도달');}
+    else if(ph!=='paused'){
+      const T=thr(),stale=S.staleSec*1000,watching=ph==='watching';
+      for(const d of Object.values(session.devices)){
+        const present=now-d.lastSeen<=stale;
+        if(!d.inRange&&present&&d.ema>=T){d.inRange=true;if(watching&&!d.excluded)onEnter(d,now)}
+        else if(d.inRange&&(!present||d.ema<T-4)){
+          d.inRange=false;
+          if(watching&&!d.excluded&&isWatchCat(d))logEvent('leave','info',`${devName(d)} 범위 이탈${present?'':' (신호 끊김)'}`,d.rid);
+        }
+        if(watching&&d.inRange&&!d.excluded)d.inRangeMs+=dt;
+        const ua=now-d.lastUseAt<USE_HOLD;
+        if(ua&&!d.useAnnounced&&watching&&d.inRange&&!d.excluded){
+          d.useAnnounced=true;d.useCount++;
+          const m=`${devName(d)} 사용 신호 — ${d.useText} (약 ${fmtDist(distOf(d.ema))})`;
+          logEvent('use','alert',m,d.rid);alarm(m);
+        }
+        if(!ua)d.useAnnounced=false;
+      }
+    }
+    if(now-lastSave>5000){saveActive();lastSave=now}
+  }
+  renderAll(now);
+}
+function levelOf(d,now){
+  if(d.excluded)return 'ex';
+  if(now-d.lastSeen>S.staleSec*1000)return 'gone';
+  if(!d.inRange)return 'out';
+  if(now-d.lastUseAt<USE_HOLD)return 'alert';
+  if(isWatchCat(d))return d.newAnnounced&&now-d.newAt<180000?'alert':'warn';
+  return 'info';
+}
+const LV_RANK={alert:0,warn:1,info:2,out:3,ex:4,gone:5};
+
+/* ========== 알림 ========== */
+let actx=null;
+function ensureAudio(){try{if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(AC)actx=new AC()}if(actx&&actx.state==='suspended')actx.resume()}catch(e){}}
+function beep(){
+  if(!S.sound||!actx)return;
+  try{const t=actx.currentTime;[0,.18].forEach((o,i)=>{const osc=actx.createOscillator(),g=actx.createGain();osc.type='sine';osc.frequency.value=i?880:1175;
+    g.gain.setValueAtTime(.0001,t+o);g.gain.exponentialRampToValueAtTime(.08,t+o+.02);g.gain.exponentialRampToValueAtTime(.0001,t+o+.14);
+    osc.connect(g).connect(actx.destination);osc.start(t+o);osc.stop(t+o+.15)})}catch(e){}
+}
+function alarm(msg){
+  alertQ.push(msg);
+  $('#alertText').textContent=alertQ.length>1?`${msg}  (외 ${alertQ.length-1}건)`:msg;
+  $('#alertBar').classList.remove('hidden');
+  if(S.vibrate&&navigator.vibrate)try{navigator.vibrate([180,90,180])}catch(e){}
+  beep();
+}
+$('#alertAck').onclick=()=>{alertQ=[];$('#alertBar').classList.add('hidden')};
+
+/* ========== 스캔 (실제 / 데모) ========== */
+function onAdvRaw(e){onAdv(e)}
+async function startRealScan(){
+  const bt=navigator.bluetooth;
+  if(!bt||typeof bt.requestLEScan!=='function')throw Object.assign(new Error('NO_SCAN_API'),{name:'NoScanApi'});
+  if(typeof bt.getAvailability==='function'){const ok=await bt.getAvailability();if(!ok)throw Object.assign(new Error('NO_ADAPTER'),{name:'NoAdapter'})}
+  bt.removeEventListener('advertisementreceived',onAdvRaw);
+  bt.addEventListener('advertisementreceived',onAdvRaw);
+  scanObj=await bt.requestLEScan({acceptAllAdvertisements:true,keepRepeatedDevices:true});
+}
+function scanErrorMsg(e){
+  const n=e&&e.name;
+  if(n==='NoScanApi')return '이 브라우저에서 블루투스 스캔 기능이 꺼져 있습니다. [설정·안내] 탭의 설정 방법을 따라 주세요.';
+  if(n==='NoAdapter')return '블루투스 어댑터를 사용할 수 없습니다. 블루투스가 켜져 있는지 확인하세요.';
+  if(n==='NotAllowedError')return '블루투스 스캔 권한이 거부되었습니다. 사이트 권한에서 허용해 주세요.';
+  if(n==='SecurityError')return 'https 주소에서 열어야 합니다(iframe 안에서는 동작하지 않습니다).';
+  if(n==='InvalidStateError'||n==='NotFoundError')return '블루투스가 꺼져 있거나 위치 권한이 없습니다.';
+  return '스캔을 시작하지 못했습니다: '+(e&&e.message||e);
+}
+async function startScan(){
+  ensureAudio();
+  if(scanning)return true;
+  const mode=S.demo?'demo':'real';
+  try{if(mode==='real')await startRealScan();else startDemo()}
+  catch(e){
+    toast(scanErrorMsg(e),5000);
+    if(e&&e.name==='NoScanApi'){switchTab('guide');runDiag()}
+    return false;
+  }
+  scanMode=mode;scanning=true;scanStartedAt=Date.now();
+  if(!session||session.stoppedAt)newSession();
+  session.warmUntil=scanStartedAt+WARM;
+  if(mode==='demo')session.demo=true;
+  keepAwake(true);
+  logEvent('system','sys',mode==='demo'?'데모 스캔 시작':'블루투스 스캔 시작');
+  $('#resumeBanner').classList.add('hidden');
+  tick();
+  return true;
+}
+function stopScan(){
+  try{if(scanObj&&scanObj.active)scanObj.stop()}catch(e){}
+  scanObj=null;
+  try{navigator.bluetooth&&navigator.bluetooth.removeEventListener('advertisementreceived',onAdvRaw)}catch(e){}
+  if(demoTimer){clearInterval(demoTimer);demoTimer=null}
+  scanning=false;
+}
+
+/* 데모: 가상 기기 */
+const mk=a=>new DataView(new Uint8Array(a).buffer);
+const DM={
+  nearby:c=>new Map([[0x004C,mk([0x10,0x05,0x10|c,0x18,0x2a,0x11,0x07])]]),
+  nearbyHandoff:c=>new Map([[0x004C,mk([0x10,0x05,0x10|c,0x1c,0x2a,0x11,0x07,0x0C,0x0E,0,0x13,0x5a,0x6b,1,2,3,4,5,6,7,8,9,10])]]),
+  airpods:()=>new Map([[0x004C,mk([0x07,0x19,0x01,0x0E,0x20,0x55,0xAA,0xB5,0x31,...Array(18).fill(0)])]]),
+  samsung:()=>new Map([[0x0075,mk([0x42,0x09,0x81,0x02,0x14,0x15,0x03,0x21,0x01,0x09])]]),
+  ms:()=>new Map([[0x0006,mk([0x01,0x09,0x20,0x02,0x7a,0x10,0x33,0x01])]]),
+  ibeacon:()=>new Map([[0x004C,mk([0x02,0x15,...Array(16).fill(0x11),0,1,0,2,0xC5])]])
+};
+let demo=null;
+function startDemo(){
+  const t0=Date.now();
+  demo={t0,v:[
+    {k:'teacher',base:-47,mfg:()=>DM.nearby(Math.random()<.7?7:3)},
+    {k:'boxA',base:-55,mfg:()=>DM.nearby(3)},
+    {k:'boxB',base:-57,mfg:DM.samsung},
+    {k:'pocket',base:-71,rot:80000,mfg:(n)=>{const c=((n-t0)/1000)%50;return c>32&&c<44?DM.nearbyHandoff(7):DM.nearby(3)}},
+    {k:'galaxy',name:'Galaxy S24',base:-76,mfg:DM.samsung},
+    {k:'buds',base:-73,mfg:DM.airpods},
+    {k:'pc',base:-86,mfg:DM.ms},
+    {k:'beacon',base:-94,mfg:DM.ibeacon},
+    {k:'late',base:-68,late:25000,mfg:()=>DM.nearby(Math.random()<.6?7:3)}
+  ]};
+  demoTimer=setInterval(()=>{
+    const now=Date.now();
+    demo.v.forEach(v=>{
+      if(Math.random()>.45)return;
+      if(v.late){if(!session||!session.startAt||now<session.startAt+v.late)return}
+      const gen=v.rot?Math.floor((now-t0)/v.rot):0;
+      const g=(Math.random()+Math.random()+Math.random()-1.5)*4;
+      const drift=Math.sin((now-t0)/9000+v.base)*2;
+      onAdv({device:{id:`demo-${v.k}-${gen}`,name:v.name||''},name:v.name||'',rssi:Math.round(v.base+g+drift),uuids:[],manufacturerData:v.mfg(now),serviceData:new Map()});
+    });
+  },250);
+}
+
+/* 화면 꺼짐 방지 */
+let wakeLock=null;
+async function keepAwake(on){
+  try{
+    if(on){if('wakeLock' in navigator&&!wakeLock){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null})}}
+    else if(wakeLock){await wakeLock.release();wakeLock=null}
+  }catch(e){}
+}
+document.addEventListener('visibilitychange',()=>{
+  if(!scanning)return;
+  if(document.visibilityState==='hidden'){if(scanMode==='real')logEvent('system','warn','화면이 가려져 스캔이 멈췄을 수 있습니다')}
+  else{
+    keepAwake(true);
+    if(scanMode==='real'&&scanObj&&scanObj.active===false){
+      stopScan();logEvent('system','warn','스캔이 중단되었습니다 — 재개 필요');showResume('스캔이 중단되었습니다. 아래 버튼을 눌러 이어서 감시하세요.');
+    }
+  }
+});
+
+/* ========== 세션 시작/종료/저장 ========== */
+async function beginWatch(){
+  if(!(await startScan()))return;
+  const now=Date.now();
+  let st=now;
+  if(S.startMode==='time'&&S.startTime){st=todayAt(S.startTime);if(st<=now){st=now;toast('지정한 시각이 지나 지금부터 감시합니다')}}
+  session.startAt=st;session.title=S.title||'감독 기록';
+  session.endAt=null;
+  if(S.endTime){let e=todayAt(S.endTime);if(e<=st)e+=86400000;session.endAt=e}
+  if(st>now)logEvent('system','sys',`${fmtHM(st)}부터 감시하도록 예약`);
+  saveActive();tick();
+}
+function stopSession(reason){
+  if(!session)return;
+  const now=Date.now();
+  stopScan();
+  session.stoppedAt=now;
+  logEvent('system','sys',reason||'감독 종료');
+  Object.values(session.devices).forEach(d=>{d.inRange=false});
+  if(session.startAt)saveHistory(session);
+  LS.del('radar.active');keepAwake(false);
+  toast(session.startAt?'감독 기록을 저장했습니다':'스캔을 종료했습니다');
+  viewId=session.id;renderAll(now);
+}
+function saveActive(){if(session&&!session.stoppedAt)LS.set('radar.active',session)}
+function getHistory(){return LS.get('radar.history',[])}
+function saveHistory(s){
+  let h=getHistory().filter(x=>x.id!==s.id);h.unshift(s);h=h.slice(0,20);
+  while(h.length&&!LS.set('radar.history',h))h.pop();
+}
+
+/* ========== 화면 그리기 ========== */
+function renderAll(now=Date.now()){
+  const ph=phase(now);
+  const pill=$('#phasePill');pill.textContent=PHASE_KO[ph]+(session&&session.demo&&ph!=='off'?' · 데모':'');pill.className='pill '+ph;
+  $('#demoBanner').classList.toggle('hidden',!(scanning&&scanMode==='demo'));
+  renderControls(ph);renderStats(ph,now);
+  if(!$('#tab-watch').hidden){renderDevices(now);renderLog()}
+}
+function renderControls(ph){
+  const c=$('#controls');const key=ph+'|'+S.demo;if(c.dataset.k===key)return;c.dataset.k=key;
+  const B=(id,txt,cls='')=>`<button class="btn ${cls}" id="${id}">${txt}</button>`;
+  let h='';
+  if(ph==='off')h=B('bStart','감시 시작','primary')+B('bBase','기준선 등록')+B('bScan','스캔만 켜기','ghost');
+  else if(ph==='prep')h=B('bStart','감시 시작','primary')+B('bBase','기준선 등록')+B('bScanOff','스캔 끄기','ghost');
+  else if(ph==='waiting'||ph==='watching')h=B('bBase','기준선 등록')+B('bStop','감독 종료','danger');
+  else if(ph==='paused')h=B('bResume','스캔 재개','primary')+B('bStop','감독 종료','danger');
+  else if(ph==='ended')h=B('bNew','새 감독 준비','primary')+B('bView','기록 보기');
+  c.innerHTML=h;
+  const on=(id,f)=>{const el=$('#'+id);if(el)el.onclick=f};
+  on('bStart',beginWatch);
+  on('bScan',startScan);
+  on('bScanOff',()=>{stopScan();session=null;LS.del('radar.active');keepAwake(false);renderAll()});
+  on('bBase',baseline);
+  on('bStop',()=>{if(confirm('감독을 종료하고 기록을 저장할까요?'))stopSession('감독 종료')});
+  on('bResume',async()=>{if(await startScan())logEvent('system','sys','스캔 재개')});
+  on('bNew',()=>{session=null;renderAll()});
+  on('bView',()=>{viewId=session&&session.id;switchTab('records')});
+  const lock=ph==='waiting'||ph==='watching'||ph==='paused';
+  ['title','startTime','endTime'].forEach(id=>$('#'+id).disabled=lock);
+  $$('#startMode button').forEach(b=>b.disabled=lock);
+}
+function renderStats(ph,now){
+  let inW=0,use=0,total=0,ex=0;
+  if(session)for(const d of Object.values(session.devices)){
+    const lv=levelOf(d,now);
+    if(lv==='ex'){ex++;continue}
+    if(lv!=='gone')total++;
+    if((lv==='alert'||lv==='warn')&&isWatchCat(d))inW++;
+    if(now-d.lastUseAt<USE_HOLD&&d.inRange)use++;
+  }
+  let timeTxt='스캔이 꺼져 있습니다',sub='';
+  if(session){
+    if(ph==='prep'){timeTxt='준비 중 · 기록 전';sub='기준선을 등록한 뒤 감시를 시작하세요'}
+    else if(ph==='waiting'){timeTxt=`시작까지 ${fmtDur(session.startAt-now)}`;sub=`${fmtHM(session.startAt)} 시작 예정`}
+    else if(ph==='watching'||ph==='paused'){timeTxt=`경과 ${fmtDur(now-session.startAt)}`;sub=session.endAt?`${fmtHM(session.endAt)} 자동 종료 · 남은 시간 ${fmtDur(session.endAt-now)}`:`${fmtHM(session.startAt)}부터 감시`}
+    else if(ph==='ended'){timeTxt='감독 종료';sub=session.startAt?`${fmtHM(session.startAt)} ~ ${fmtHM(session.stoppedAt)}`:''}
+  }
+  $('#stats').innerHTML=
+    `<div class="stat wide"><div><b>${timeTxt}</b><span>${esc(sub)}</span></div><span>${session?esc(session.title):''}</span></div>`+
+    `<div class="stat ${inW?'warn':''}"><b>${inW}</b><span>범위 내 감시 대상</span></div>`+
+    `<div class="stat ${use?'alert':''}"><b>${use}</b><span>사용 신호</span></div>`+
+    `<div class="stat"><b>${total}</b><span>주변 전체</span></div>`+
+    `<div class="stat"><b>${ex}</b><span>제외</span></div>`;
+}
+function renderDevices(now){
+  const box=$('#devList');
+  if(!session){box.innerHTML='<div class="empty">감시를 시작하면 주변 블루투스 기기가 여기에 표시됩니다.</div>';return}
+  let list=Object.values(session.devices).map(d=>({d,lv:levelOf(d,now)}));
+  if(filter==='range')list=list.filter(x=>['alert','warn','info'].includes(x.lv));
+  else if(filter==='watch')list=list.filter(x=>isWatchCat(x.d)&&x.lv!=='ex'&&x.lv!=='gone');
+  else if(filter==='ex')list=list.filter(x=>x.lv==='ex');
+  list.sort((a,b)=>LV_RANK[a.lv]-LV_RANK[b.lv]||b.d.ema-a.d.ema);
+  if(!list.length){box.innerHTML=`<div class="empty">${filter==='ex'?'제외된 기기가 없습니다.':'표시할 기기가 없습니다.'}</div>`;return}
+  box.innerHTML=list.slice(0,80).map(({d,lv})=>{
+    const dist=distOf(d.ema),pct=Math.max(4,Math.min(100,(d.ema+100)/60*100));
+    const badges=[];
+    if(now-d.lastUseAt<USE_HOLD)badges.push(`<span class="badge use">${esc(d.useText)}</span>`);
+    else if(d.actText&&now-d.actAt<USE_HOLD)badges.push(`<span class="badge idle">${esc(d.actText)}</span>`);
+    if(d.newAfterStart)badges.push('<span class="badge new">신규</span>');
+    if(d.excluded)badges.push('<span class="badge ex">제외</span>');
+    if(lv==='out')badges.push('<span class="badge idle">범위 밖</span>');
+    if(lv==='gone')badges.push('<span class="badge idle">신호 없음</span>');
+    const sub=[d.name?`“${esc(d.name)}”`:'',COMP[d.company]||'',`최초 ${fmtT(d.firstSeen)}`,d.inRangeMs?`범위 내 ${fmtDur(d.inRangeMs)}`:''].filter(Boolean).join(' · ');
+    return `<div class="dev lv-${lv}" data-rid="${d.rid}"><div class="ic">${CAT[d.cat].ic}</div>
+      <div class="mid"><div class="t1"><b>${esc(devName(d))}</b><span>${CAT[d.cat].ko}</span>${badges.join('')}</div><div class="t2">${sub}</div></div>
+      <div class="right"><div class="dist">~${fmtDist(dist)}</div><div class="bar"><i style="width:${pct}%"></i></div><div class="rssi">${Math.round(d.ema)} dBm</div></div></div>`;
+  }).join('');
+}
+function renderLog(){
+  const box=$('#eventLog');
+  if(!session||!session.events.length){box.innerHTML='<div class="empty">아직 기록이 없습니다.</div>';$('#logCount').textContent='';return}
+  const ev=session.events;
+  if(box.dataset.n==String(ev.length)&&box.dataset.s===session.id)return;
+  box.dataset.n=ev.length;box.dataset.s=session.id;
+  $('#logCount').textContent=`${ev.length}건`;
+  box.innerHTML=ev.slice(-150).reverse().map(e=>`<div class="ev ${e.level}"><i></i><time>${fmtT(e.t)}</time><span>${esc(e.msg)}</span></div>`).join('');
+}
+
+/* 레이더 */
+function hashAng(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return ((h>>>0)%3600)/3600*Math.PI*2}
+const LV_COLOR={alert:'#ff5d5d',warn:'#ffb547',info:'#7aa2ff',out:'#3b4a5e',ex:'#5b6676'};
+function drawRadar(){
+  requestAnimationFrame(drawRadar);
+  if(document.hidden||$('#tab-watch').hidden)return;
+  const c=$('#radar'),w=c.clientWidth;if(!w)return;
+  const dpr=window.devicePixelRatio||1;if(c.width!==Math.round(w*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(w*dpr)}
+  const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,w);
+  const cx=w/2,cy=w/2,R=w/2-16,maxD=S.radius*1.8;
+  x.strokeStyle='#243142';x.lineWidth=1;x.fillStyle='#8b9aad';x.font='11px sans-serif';x.textAlign='center';
+  for(let i=1;i<=4;i++){x.beginPath();x.arc(cx,cy,R*i/4,0,Math.PI*2);x.stroke();x.fillText(`${(maxD*i/4).toFixed(maxD*i/4<10?1:0)}m`,cx,cy-R*i/4+12)}
+  x.beginPath();x.moveTo(cx-R,cy);x.lineTo(cx+R,cy);x.moveTo(cx,cy-R);x.lineTo(cx,cy+R);x.stroke();
+  const rr=R*S.radius/maxD;
+  x.fillStyle='rgba(79,209,197,.06)';x.beginPath();x.arc(cx,cy,rr,0,Math.PI*2);x.fill();
+  x.setLineDash([6,5]);x.strokeStyle='#4fd1c5';x.lineWidth=1.5;x.beginPath();x.arc(cx,cy,rr,0,Math.PI*2);x.stroke();x.setLineDash([]);
+  if(scanning){
+    const a=(performance.now()/1000*1.4)%(Math.PI*2);
+    for(let k=0;k<24;k++){x.strokeStyle=`rgba(79,209,197,${.28*(1-k/24)})`;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(a-k*.025)*R,cy+Math.sin(a-k*.025)*R);x.stroke()}
+  }
+  x.fillStyle='#4fd1c5';x.beginPath();x.arc(cx,cy,4,0,Math.PI*2);x.fill();
+  if(!session)return;
+  const now=Date.now(),pulse=(Math.sin(performance.now()/180)+1)/2;
+  for(const d of Object.values(session.devices)){
+    const lv=levelOf(d,now);if(lv==='gone')continue;
+    const r=Math.min(distOf(d.ema)/maxD,1)*R,a=hashAng(d.rid);
+    const px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r,sz=lv==='alert'?6:lv==='warn'?5:3.5;
+    if(lv==='alert'){x.fillStyle=`rgba(255,93,93,${.15+.25*pulse})`;x.beginPath();x.arc(px,py,sz+6+pulse*6,0,Math.PI*2);x.fill()}
+    x.fillStyle=LV_COLOR[lv];x.beginPath();x.arc(px,py,sz,0,Math.PI*2);x.fill();
+    if(lv==='alert'||lv==='warn'){x.fillStyle='#e6edf5';x.font='10px sans-serif';x.fillText(pad(d.no),px,py-sz-4)}
+  }
+}
+
+/* ========== 기기 상세 / 기준선 ========== */
+function openSheet(html){$('#sheetInner').innerHTML=html;$('#sheet').classList.remove('hidden')}
+function closeSheet(){$('#sheet').classList.add('hidden')}
+$('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet')closeSheet()});
+$('#devList').addEventListener('click',e=>{const el=e.target.closest('.dev');if(el)openDevice(el.dataset.rid)});
+function openDevice(rid){
+  const d=session&&session.devices[rid];if(!d)return;const now=Date.now();
+  openSheet(`<h3>${CAT[d.cat].ic} ${esc(devName(d))}</h3><div class="muted">${CAT[d.cat].ko}${d.newAfterStart?' · 감시 시작 후 등장':''}</div>
+  <dl class="kv">
+    <dt>광고 이름</dt><dd>${esc(d.name||'(없음)')}</dd>
+    <dt>제조사</dt><dd>${esc(COMP[d.company]||(d.company!=null?'0x'+d.company.toString(16).toUpperCase().padStart(4,'0'):'알 수 없음'))}</dd>
+    <dt>신호 유형</dt><dd>${esc(d.types.join(', ')||'-')}</dd>
+    <dt>최근 상태</dt><dd>${esc(d.actText?`${d.actText} (${fmtT(d.actAt)})`:'-')}</dd>
+    <dt>현재 신호</dt><dd>${Math.round(d.ema)} dBm · 약 ${fmtDist(distOf(d.ema))}</dd>
+    <dt>가장 가까울 때</dt><dd>${d.max} dBm · 약 ${fmtDist(distOf(d.max))}</dd>
+    <dt>최초 / 마지막</dt><dd>${fmtT(d.firstSeen)} / ${fmtT(d.lastSeen)}${now-d.lastSeen>S.staleSec*1000?' (신호 없음)':''}</dd>
+    <dt>범위 내 시간</dt><dd>${fmtDur(d.inRangeMs)}</dd>
+    <dt>사용 신호</dt><dd>${d.useCount}회</dd>
+    <dt>주소 변경 병합</dt><dd>${d.rotations}회</dd>
+  </dl>
+  <label for="memoIn">위치·좌석 메모</label>
+  <input type="text" id="memoIn" maxlength="30" placeholder="예: 3분단 뒤, 창가 4번째" value="${esc(d.memo)}">
+  <div class="controls" style="margin-top:12px">
+    <button class="btn primary" id="sMemo">메모 저장</button>
+    <button class="btn" id="sEx">${d.excluded?'제외 해제':'감시에서 제외'}</button>
+  </div>
+  <div class="controls" style="margin-top:8px">
+    <button class="btn ghost" id="sCal">이 기기로 1m 보정</button>
+    <button class="btn ghost" id="sClose">닫기</button>
+  </div>
+  <small style="display:block;margin-top:8px">1m 보정: 이 기기를 감독용 기기에서 정확히 1m 떨어뜨려 두고 몇 초 뒤 누르세요.</small>`);
+  $('#sMemo').onclick=()=>{d.memo=$('#memoIn').value.trim();if(phase()==='watching')logEvent('memo','info',`기기 ${pad(d.no)} 메모: ${d.memo||'(삭제)'}`,d.rid);saveActive();closeSheet();renderAll()};
+  $('#sEx').onclick=()=>{d.excluded=!d.excluded;if(session.startAt)logEvent('exclude','info',`${devName(d)} ${d.excluded?'제외':'제외 해제'}`,d.rid);saveActive();closeSheet();renderAll()};
+  $('#sCal').onclick=()=>{S.tx=Math.round(d.ema);saveSettings();syncSettingsUI();toast(`1m 기준 신호를 ${S.tx} dBm으로 맞췄습니다`);closeSheet();renderAll()};
+  $('#sClose').onclick=closeSheet;
+}
+async function baseline(){
+  if(!scanning){
+    if(!(await startScan()))return;
+  }
+  const wait=Math.max(0,10000-(Date.now()-scanStartedAt));
+  if(wait>0){
+    openSheet(`<h3>기준선 수집 중…</h3><p class="muted">주변 기기 신호를 모으고 있습니다. <b id="bCount">${Math.ceil(wait/1000)}</b>초 남음</p>`);
+    const end=Date.now()+wait;
+    await new Promise(res=>{const iv=setInterval(()=>{const left=end-Date.now();const el=$('#bCount');if(el)el.textContent=Math.max(0,Math.ceil(left/1000));if(left<=0){clearInterval(iv);res()}},250)});
+  }
+  if(!session)return;
+  const now=Date.now();
+  const list=Object.values(session.devices).filter(d=>now-d.lastSeen<=S.staleSec*1000).sort((a,b)=>b.ema-a.ema);
+  if(!list.length){openSheet('<h3>감지된 기기가 없습니다</h3><p class="muted">블루투스 권한과 설정을 확인한 뒤 다시 시도하세요.</p><div class="controls"><button class="btn" id="sClose">닫기</button></div>');$('#sClose').onclick=closeSheet;return}
+  openSheet(`<h3>기준선 등록</h3><p class="muted">체크한 기기는 감시에서 제외됩니다. <b>1.5m 이내</b>(수거함·감독 교사 휴대폰)로 추정되는 기기는 미리 체크해 두었습니다.</p>
+  <div class="blist">${list.map(d=>{const di=distOf(d.ema);return `<label class="bitem"><input type="checkbox" value="${d.rid}" ${d.excluded||di<=1.5?'checked':''}>
+    <span>${CAT[d.cat].ic}</span><div class="mid"><b>${esc(devName(d))}</b> ${CAT[d.cat].ko}<div class="muted">${d.name?`“${esc(d.name)}” · `:''}${COMP[d.company]||''}</div></div><b>~${fmtDist(di)}</b></label>`}).join('')}</div>
+  <div class="controls"><button class="btn primary" id="bOk">선택한 기기 제외</button><button class="btn ghost" id="sClose">취소</button></div>`);
+  $('#sClose').onclick=closeSheet;
+  $('#bOk').onclick=()=>{
+    let n=0;$$('.blist input').forEach(cb=>{const d=session.devices[cb.value];if(!d)return;if(cb.checked&&!d.excluded){d.excluded=true;n++}else if(!cb.checked&&d.excluded)d.excluded=false});
+    logEvent('baseline','sys',`기준선 등록 — ${n}대 제외`);saveActive();closeSheet();toast(`${n}대를 제외 목록에 추가했습니다`);renderAll();
+  };
+}
+
+/* ========== 재개 배너 ========== */
+function showResume(msg){
+  const b=$('#resumeBanner');b.classList.remove('hidden');
+  b.innerHTML=`${esc(msg)}<div class="controls"><button class="btn primary" id="rGo">스캔 재개</button><button class="btn danger" id="rEnd">종료하고 저장</button></div>`;
+  $('#rGo').onclick=async()=>{if(await startScan()){logEvent('system','sys','스캔 재개');b.classList.add('hidden')}};
+  $('#rEnd').onclick=()=>{b.classList.add('hidden');stopSession('감독 종료(중단된 세션)')};
+}
+
+/* ========== 기록 / 보고서 ========== */
+function allSessions(){const h=getHistory();if(session&&!h.some(x=>x.id===session.id)&&session.startAt)h.unshift(session);return h}
+function renderRecords(){
+  const list=allSessions();
+  const box=$('#sessList');
+  if(!list.length){box.innerHTML='<div class="empty">저장된 감독 기록이 없습니다.</div>';$('#reportView').innerHTML='';$('#reportCard').classList.add('hidden');return}
+  $('#reportCard').classList.remove('hidden');
+  if(!viewId||!list.some(s=>s.id===viewId))viewId=list[0].id;
+  box.innerHTML=list.map(s=>{const sm=summary(s);return `<div class="sess ${s.id===viewId?'on':''}" data-id="${s.id}"><div class="mid"><b>${esc(s.title)}</b>${s.demo?' <span class="badge">데모</span>':''}${!s.stoppedAt?' <span class="badge new">진행 중</span>':''}
+    <div class="muted">${fmtD(s.startAt)} ${fmtHM(s.startAt)} ~ ${s.stoppedAt?fmtHM(s.stoppedAt):'진행 중'} · 감시 대상 ${sm.watchDev}대 · 사용 신호 ${sm.use}회</div></div></div>`}).join('');
+  const s=list.find(x=>x.id===viewId);
+  $('#reportView').innerHTML=reportHTML(s);
+  $('#delRep').disabled=!s.stoppedAt;
+}
+$('#sessList').addEventListener('click',e=>{const el=e.target.closest('.sess');if(el){viewId=el.dataset.id;renderRecords()}});
+function summary(s){
+  const devs=Object.values(s.devices).filter(d=>!d.excluded);
+  return {watchDev:devs.filter(d=>CAT[d.cat].watch&&d.inRangeMs>0).length,use:s.events.filter(e=>e.type==='use').length,newDev:s.events.filter(e=>e.type==='new').length,ex:Object.values(s.devices).filter(d=>d.excluded).length};
+}
+function reportDevices(s){return Object.values(s.devices).filter(d=>d.inRangeMs>0||d.useCount||d.excluded||d.memo).sort((a,b)=>(b.useCount-a.useCount)||(b.inRangeMs-a.inRangeMs))}
+function reportHTML(s){
+  const sm=summary(s),st=s.settings||{};
+  const dist=(r)=>{const tx=st.tx??S.tx,n=st.n??S.n;return fmtDist(Math.pow(10,(tx-r)/(10*n)))};
+  const devs=reportDevices(s);
+  const evs=s.events.filter(e=>e.level!=='sys'||e.type==='system'||e.type==='baseline');
+  return `<h2 style="font-size:16px;margin:4px 0 8px">${esc(s.title)} — 전자기기 감지 기록${s.demo?' (데모 데이터)':''}</h2>
+  <table class="rep"><tr><th>날짜</th><td>${fmtD(s.startAt)}</td><th>감시 시간</th><td>${fmtT(s.startAt)} ~ ${s.stoppedAt?fmtT(s.stoppedAt):'진행 중'}</td></tr>
+  <tr><th>감지 반경</th><td>약 ${st.radius??S.radius}m</td><th>제외 기기</th><td>${sm.ex}대 (기준선·수동 제외)</td></tr>
+  <tr><th>범위 내 감시 대상</th><td><b>${sm.watchDev}대</b></td><th>사용 신호 / 신규 등장</th><td><b>${sm.use}회 / ${sm.newDev}대</b></td></tr></table>
+  <h3>기기별 기록</h3>
+  ${devs.length?`<table class="rep"><tr><th>기기</th><th>종류</th><th>메모</th><th>최초~마지막</th><th>범위 내</th><th>최근접</th><th>사용 신호</th></tr>
+  ${devs.map(d=>`<tr><td>기기 ${pad(d.no)}${d.excluded?' (제외)':''}${d.newAfterStart?' <b>신규</b>':''}</td><td>${CAT[d.cat].ko}${d.name?`<br><span class="muted">“${esc(d.name)}”</span>`:''}</td><td>${esc(d.memo)}</td><td>${fmtT(d.firstSeen)}~${fmtT(d.lastSeen)}</td><td>${fmtDur(d.inRangeMs)}</td><td>~${dist(d.max)}</td><td>${d.useCount||''}</td></tr>`).join('')}</table>`:'<p class="muted">범위 안에서 감지된 기기가 없습니다.</p>'}
+  <h3>감독 로그</h3>
+  ${evs.length?`<table class="rep"><tr><th style="width:70px">시각</th><th>내용</th></tr>${evs.slice(0,600).map(e=>`<tr><td>${fmtT(e.t)}</td><td>${e.level==='alert'?'<b>':''}${esc(e.msg)}${e.level==='alert'?'</b>':''}</td></tr>`).join('')}</table>`:'<p class="muted">로그가 없습니다.</p>'}
+  <p class="muted" style="margin-top:10px">※ 블루투스 신호 세기로 추정한 감독 보조 기록입니다. 거리·기기 종류는 추정값이며, 부정행위 판단의 단독 근거로 사용할 수 없습니다.</p>`;
+}
+function curReport(){return allSessions().find(x=>x.id===viewId)}
+function dl(name,text){
+  const blob=new Blob(['﻿'+text],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+}
+const csvCell=v=>{v=String(v??'');return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
+const fname=s=>`${(s.title||'감독기록').replace(/[\\/:*?"<>|\s]+/g,'_')}_${fmtD(s.startAt).replace(/\./g,'')}`;
+$('#csvEvents').onclick=()=>{const s=curReport();if(!s)return;
+  dl(fname(s)+'_로그.csv',[['시각','구분','중요도','기기','내용'].join(','),...s.events.map(e=>[fmtD(e.t)+' '+fmtT(e.t),e.type,e.level,e.rid?('기기 '+pad(s.devices[e.rid]?.no||0)):'',e.msg].map(csvCell).join(','))].join('\n'))};
+$('#csvDevices').onclick=()=>{const s=curReport();if(!s)return;
+  dl(fname(s)+'_기기.csv',[['기기','종류','광고이름','제조사','메모','제외','신규등장','최초감지','마지막감지','범위내(초)','최대신호(dBm)','사용신호(회)','주소변경병합(회)'].join(','),
+  ...Object.values(s.devices).map(d=>['기기 '+pad(d.no),CAT[d.cat].ko,d.name,COMP[d.company]||'',d.memo,d.excluded?'Y':'',d.newAfterStart?'Y':'',fmtT(d.firstSeen),fmtT(d.lastSeen),Math.round(d.inRangeMs/1000),d.max,d.useCount,d.rotations].map(csvCell).join(','))].join('\n'))};
+$('#printRep').onclick=()=>{const s=curReport();if(!s)return;$('#printArea').innerHTML=reportHTML(s);window.print()};
+$('#delRep').onclick=()=>{const s=curReport();if(!s||!s.stoppedAt)return;if(!confirm('이 기록을 삭제할까요?'))return;
+  LS.set('radar.history',getHistory().filter(x=>x.id!==s.id));if(session&&session.id===s.id)session=null;viewId=null;renderRecords();renderAll()};
+
+/* ========== 진단 ========== */
+async function runDiag(){
+  const items=[];
+  const add=(st,t)=>items.push(`<li><b class="${st==='ok'?'ok':st==='bad'?'bad':'mid-t'}">${st==='ok'?'✓':st==='bad'?'✕':'!'}</b><span>${t}</span></li>`);
+  add(window.isSecureContext?'ok':'bad',window.isSecureContext?'보안 연결(https 또는 로컬 파일)':'보안 연결이 아닙니다 — https 주소로 열어야 합니다');
+  let framed=false;try{framed=window.top!==window.self}catch(e){framed=true}
+  add(framed?'warn':'ok',framed?'다른 페이지 안(iframe)에서 열려 있습니다 — 블루투스가 차단될 수 있습니다':'단독 페이지로 열림');
+  const bt=navigator.bluetooth;
+  add(bt?'ok':'bad',bt?'Web Bluetooth 지원':'이 브라우저는 Web Bluetooth를 지원하지 않습니다 (안드로이드 크롬 권장, 아이폰 사파리 불가)');
+  add(bt&&typeof bt.requestLEScan==='function'?'ok':'bad',bt&&typeof bt.requestLEScan==='function'?'블루투스 주변 스캔 기능 켜짐':'주변 스캔 기능 꺼짐 — chrome://flags 에서 Experimental Web Platform features 를 Enabled로');
+  if(bt&&typeof bt.getAvailability==='function'){try{const a=await bt.getAvailability();add(a?'ok':'bad',a?'블루투스 어댑터 사용 가능':'블루투스 어댑터를 찾을 수 없거나 꺼져 있습니다')}catch(e){add('warn','블루투스 상태 확인 실패')}}
+  add('wakeLock' in navigator?'ok':'warn','wakeLock' in navigator?'화면 꺼짐 방지 지원':'화면 꺼짐 방지 미지원 — 기기 화면 자동 꺼짐 시간을 늘려 주세요');
+  add('vibrate' in navigator?'ok':'warn','vibrate' in navigator?'진동 알림 지원':'진동 알림 미지원(PC 등)');
+  $('#diagList').innerHTML=items.join('');
+}
+$('#diagBtn').onclick=runDiag;
+
+/* ========== 설정 UI 연결 ========== */
+function updateRadiusUI(){$('#radiusVal').textContent=`약 ${S.radius}m`;$('#radiusHint').textContent=`신호 ${Math.round(thr())} dBm 이상인 기기를 범위 안으로 봅니다 · 1m 기준 ${S.tx} dBm`}
+function syncSettingsUI(){
+  $('#title').value=S.title;$('#startTime').value=S.startTime;$('#endTime').value=S.endTime;$('#radius').value=S.radius;
+  $$('#startMode button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.startMode));
+  $('#startTime').classList.toggle('hidden',S.startMode!=='time');
+  $('#txIn').value=S.tx;$('#nIn').value=String(S.n);$('#staleIn').value=S.staleSec;
+  $('#vibIn').checked=S.vibrate;$('#sndIn').checked=S.sound;$('#mergeIn').checked=S.merge;$('#dimIn').checked=S.dim;$('#demoIn').checked=S.demo;
+  document.body.classList.toggle('dim',S.dim);
+  updateRadiusUI();
+}
+$('#title').oninput=e=>{S.title=e.target.value;saveSettings();if(session&&!session.startAt)session.title=S.title||'감독 기록'};
+$('#startTime').onchange=e=>{S.startTime=e.target.value;saveSettings()};
+$('#endTime').onchange=e=>{S.endTime=e.target.value;saveSettings()};
+$('#radius').oninput=e=>{S.radius=parseFloat(e.target.value);saveSettings();updateRadiusUI();if(session&&session.watchStarted&&!session.stoppedAt)session.settings.radius=S.radius};
+$('#radius').onchange=()=>{if(phase()==='watching')logEvent('setting','info',`감지 반경 변경: 약 ${S.radius}m`)};
+$('#startMode').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;S.startMode=b.dataset.v;
+  if(S.startMode==='time'&&!S.startTime){const d=new Date(Date.now()+10*60000);S.startTime=`${pad(d.getHours())}:${pad(d.getMinutes())}`}
+  saveSettings();syncSettingsUI()};
+$('#txIn').onchange=e=>{const v=parseInt(e.target.value,10);if(v>=-90&&v<=-30){S.tx=v;saveSettings()}syncSettingsUI()};
+$('#nIn').onchange=e=>{S.n=parseFloat(e.target.value);saveSettings();updateRadiusUI()};
+$('#staleIn').onchange=e=>{const v=parseInt(e.target.value,10);if(v>=5&&v<=120){S.staleSec=v;saveSettings()}syncSettingsUI()};
+$('#vibIn').onchange=e=>{S.vibrate=e.target.checked;saveSettings()};
+$('#sndIn').onchange=e=>{S.sound=e.target.checked;saveSettings();ensureAudio();if(S.sound)beep()};
+$('#mergeIn').onchange=e=>{S.merge=e.target.checked;saveSettings()};
+$('#dimIn').onchange=e=>{S.dim=e.target.checked;saveSettings();syncSettingsUI()};
+$('#demoIn').onchange=e=>{
+  if(scanning){e.target.checked=S.demo;toast('스캔 중에는 바꿀 수 없습니다. 감독을 종료한 뒤 바꿔 주세요.');return}
+  S.demo=e.target.checked;saveSettings();toast(S.demo?'데모 모드를 켰습니다. [감독] 탭에서 시작해 보세요.':'데모 모드를 껐습니다.');renderAll()};
+$('#wipeAll').onclick=()=>{if(!confirm('저장된 모든 감독 기록과 설정을 삭제할까요?'))return;stopScan();session=null;['radar.history','radar.active','radar.settings'].forEach(LS.del);Object.assign(S,DEF);syncSettingsUI();renderAll();renderRecords();toast('모두 삭제했습니다')};
+$('#filters').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;filter=b.dataset.f;$$('#filters .chip').forEach(x=>x.classList.toggle('on',x===b));renderAll()};
+
+/* 탭 */
+function switchTab(t){
+  $$('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  ['watch','records','guide'].forEach(k=>$('#tab-'+k).hidden=k!==t);
+  if(t==='records')renderRecords();
+  if(t==='guide')runDiag();
+  if(t==='watch'){$('#eventLog').dataset.n='';renderAll()}
+  window.scrollTo(0,0);
+}
+$$('nav.tabs button').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+
+/* ========== 시작 ========== */
+(function init(){
+  syncSettingsUI();
+  $$('#filters .chip').forEach(x=>x.classList.toggle('on',x.dataset.f===filter));
+  const act=LS.get('radar.active',null);
+  if(act&&act.id&&!act.stoppedAt){
+    session=act;
+    if(act.startAt)showResume(`진행 중이던 감독 "${act.title}"이(가) 있습니다 (${fmtHM(act.startAt)} 시작). 이어서 감시하거나 종료하고 저장하세요.`);
+    else{session=null;LS.del('radar.active')}
+  }
+  renderAll();
+  setInterval(tick,1000);
+  requestAnimationFrame(drawRadar);
+})();
+</script>
+</body>
+</html>
